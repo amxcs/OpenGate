@@ -54,6 +54,11 @@ If you want to keep the PS2 boot logo (splash screen), use
 [OSDMenu](https://github.com/pcm720/OSDMenu) as `BOOT/BOOT.ELF`: it boots the
 same way as the stock browser, with the splash screen shown.
 
+Instead of the original, unmodified OSDMenu you can also use my version:
+`BOOT.ELF` from the [latest release](https://github.com/amxcs/OpenGate/releases/latest).
+As a bonus, burned discs start instantly and a few screen flickers are gone
+(it uses a custom disc loader).
+
 ## How it works
 
 On start-up the console reads the built-in card and loads `BOOT/BOOT.ELF`
