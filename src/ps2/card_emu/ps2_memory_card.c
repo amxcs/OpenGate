@@ -33,6 +33,28 @@ uint8_t term = 0xFF;
 static int memcard_running;
 volatile bool ps2_card_active;
 
+/* OpenGate real-reset detection. Transactions are grouped into clusters separated
+ * by >= 100 ms (start to start). A console boot probes the bus with a burst of
+ * ~22 transactions starting with 0x21; a real reset has >= 1.4 s of silence
+ * before that burst, the console's own IOP reboots ~1.0 s or less. The re-arm
+ * is requested the moment the burst reaches OPENGATE_BOOT_BURST_MIN (~1.1 s
+ * before the console's 0xF3 auth reset), so the card switch is finished before
+ * MagicGate auth begins. */
+static uint32_t gb_last_start, gb_cl_pregap, gb_cl_n21;
+static inline void __time_critical_func(opengate_reset_track)(uint8_t cmd) {
+    uint32_t now = time_us_32();
+    uint32_t gap = gb_last_start ? now - gb_last_start : 0u;
+    bool first = !gb_last_start;
+    gb_last_start = now;
+    if (first || gap >= 100000u) {
+        gb_cl_pregap = gap;
+        gb_cl_n21 = 0;
+    }
+    if (cmd == 0x21 && ++gb_cl_n21 == OPENGATE_BOOT_BURST_MIN
+            && gb_cl_pregap >= OPENGATE_RESET_PREGAP_US)
+        ps2_cardman_opengate_notify_reset();
+}
+
 volatile int ps2_mc_exit_request;
 static volatile int mc_exit_response, mc_enter_request, mc_enter_response;
 
@@ -116,6 +138,7 @@ static void __time_critical_func(mc_main_loop)(void) {
             continue;
 
 
+        opengate_reset_track(cmd);
         if (cmd == PS2_SIO2_CMD_IDENTIFIER) {
             if (ps2_card_backend->probe()) {
                 continue;

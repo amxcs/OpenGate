@@ -1,3 +1,4 @@
+#include "opengate_ecc_policy.h"
 #include "ps2_mc_commands.h"
 
 #include <stdint.h>
@@ -39,6 +40,13 @@ int is_write;
 uint32_t readptr, writeptr;
 uint8_t *eccptr;
 uint64_t last_response;
+static opengate_ecc_policy_t opengate_policy;
+static volatile bool opengate_raw_reads;
+bool ps2_mc_opengate_raw_reads(void) { return opengate_raw_reads; }
+void ps2_mc_opengate_mount(bool boot) {
+    opengate_policy = (opengate_ecc_policy_t){boot, false};
+    opengate_raw_reads = boot;
+}
 
 static void __time_critical_func(delayed_response)(char ch, uint32_t delay, const char* func) {
 #ifdef DEBUG_USB_UART
@@ -266,6 +274,10 @@ inline __attribute__((always_inline)) void __time_critical_func(ps2_mc_cmd_readD
     uint8_t ck = 0;
     uint8_t b = 0xFF;
     last_response = time_us_64();
+    if (ps2_cardman_builtin_active()) {
+        opengate_ecc_policy_observe(&opengate_policy, read_sector);
+        opengate_raw_reads = opengate_policy.armed;
+    }
     if (readptr < PS2_PAGE_SIZE)
         page = ps2_mc_data_interface_get_page(read_sector);
     delayed_response(0xFF, PS2_MAX_ACK_DELAY_SHORT, __func__);
@@ -294,6 +306,11 @@ inline __attribute__((always_inline)) void __time_critical_func(ps2_mc_cmd_readD
                     readecc[3] = conquestECC & 0xFF;
                 }
                 b = readecc[readptr - PS2_PAGE_SIZE];
+                if (ps2_cardman_builtin_active() && opengate_policy.armed && read_sector == 201) {
+                    if (readptr == PS2_PAGE_SIZE + 9) b = 0x70;
+                    if (readptr == PS2_PAGE_SIZE + 10) b = 0x84;
+                    if (readptr == PS2_PAGE_SIZE + 11) b = 0xfb;
+                }
             }
 
             delayed_response(b, PS2_MAX_ACK_DELAY_MID, __func__);

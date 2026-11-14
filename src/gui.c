@@ -1256,6 +1256,10 @@ void gui_request_refresh(void) {
 
 void gui_do_ps1_card_switch(void) {
     log(LOG_INFO, "switching the card now!\n");
+    /* OpenGate: the header caches compare against the values from the last time
+     * this mode was shown; force a redraw on every mode entry, otherwise
+     * re-entering PS1 with the same card keeps showing the PS2 card name. */
+    refresh_gui = true;
 
     if (ui_state != UI_STATE_SPLASH) {
         ui_state = UI_STATE_MAIN;
@@ -1266,6 +1270,7 @@ void gui_do_ps1_card_switch(void) {
 
 void gui_do_ps2_card_switch(void) {
     current_progress = 0;
+    refresh_gui = true; /* OpenGate: see gui_do_ps1_card_switch() */
 
     update_bar();
 

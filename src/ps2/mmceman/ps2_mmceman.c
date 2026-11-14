@@ -129,6 +129,10 @@ void ps2_mmceman_task(void) {
 
         log(LOG_INFO, "%s Switching card now\n", __func__);
         uint32_t switching_time = time_us_32();
+        /* OpenGate: mounting the builtin happens while the console is rebooting
+         * and will run a full auth anyway, so skip the 500 ms "card removed"
+         * pause and the mcman ignore ramp. */
+        bool opengate_fast = ps2_cardman_opengate_switch_pending();
 
         ps2_history_tracker_init();
 
@@ -139,14 +143,16 @@ void ps2_mmceman_task(void) {
         ps2_cardman_close();
         log(LOG_TRACE, "%s After Close\n", __func__);
 
-        ps2_card_backend_get()->switch_delay(500);
+        if (!opengate_fast)
+            ps2_card_backend_get()->switch_delay(500);
 #if WITH_GUI
         gui_do_ps2_card_switch();
         log(LOG_TRACE, "%s After GUI\n", __func__);
         gui_request_refresh();
         log(LOG_TRACE, "%s After Refresh\n", __func__);
 #endif
-        ps2_mmceman_rearm_retry_counter();
+        if (!opengate_fast)
+            ps2_mmceman_rearm_retry_counter();
 
         // open new card
         ps2_cardman_open();

@@ -1,4 +1,5 @@
 #pragma once
+#include <stdbool.h>
 
 
 #include <stdint.h>
@@ -23,3 +24,8 @@ void ps1_memory_card_exit(void);
 uint8_t ps1_memory_card_get_ode_command(void);
 void ps1_memory_card_reset_ode_command(void);
 const char* ps1_memory_card_get_game_id(void);
+
+/* OpenGate: PS2 console boot seen while in PS1 mode (see ps1_memory_card.c). */
+#define OPENGATE_PS1_RESET_PREGAP_US 1400000u
+#define OPENGATE_PS1_BOOT_BURST_MIN  12u
+extern volatile bool opengate_ps1_ps2_boot_req;

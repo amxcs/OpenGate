@@ -1,3 +1,4 @@
+#include "opengate_elf_watch.h"
 #include "ps2_mmceman_fs.h"
 
 #include <stdbool.h>
@@ -26,6 +27,7 @@
 
 //Global data struct
 static volatile ps2_mmceman_fs_op_data_t op_data;
+static opengate_elf_watch_t opengate_boot_elf = {-1, false};
 static volatile uint32_t mmceman_fs_operation;
 critical_section_t mmceman_fs_crit;
 
@@ -36,6 +38,7 @@ static bool mmceman_fs_fd_has_iterator_slot(int fd)
 
 void ps2_mmceman_fs_init(void)
 {
+    opengate_boot_elf = (opengate_elf_watch_t){-1, false};
     op_data.rv = 0;
     op_data.fd = 0;
     //op_data.it_fd = 0;
@@ -84,6 +87,7 @@ void ps2_mmceman_fs_run(void)
     switch (mmceman_fs_operation) {
         case MMCEMAN_FS_OPEN:
             op_data.fd = sd_open((const char*)op_data.buffer[0], op_data.flags);
+            opengate_elf_watch_open(&opengate_boot_elf, op_data.fd, (const char*)op_data.buffer[0], ps2_cardman_builtin_active());
 
             if (op_data.fd < 0) {
                 log(LOG_ERROR, "Open failed, fd: %i\n", op_data.fd);
@@ -94,6 +98,7 @@ void ps2_mmceman_fs_run(void)
 
         case MMCEMAN_FS_CLOSE:
             op_data.rv = sd_close(op_data.fd);
+            if (opengate_elf_watch_close(&opengate_boot_elf, op_data.fd, op_data.rv)) ps2_cardman_builtin_elf_closed();
 
             //Discard data read ahead from file
             if (op_data.fd == op_data.read_ahead.fd) {
@@ -131,6 +136,8 @@ void ps2_mmceman_fs_run(void)
 
                     //Read
                     op_data.rv = sd_read(op_data.fd, (void*)op_data.buffer[op_data.head_idx], bytes_in_chunk);
+                    if (op_data.fd == opengate_boot_elf.fd && op_data.rv > 0)
+                        opengate_elf_watch_read(&opengate_boot_elf, op_data.fd, op_data.rv, sd_tell64(op_data.fd), sd_filesize64(op_data.fd));
 
                     //Failed to get requested amount
                     if (op_data.rv != (int)bytes_in_chunk) {
@@ -177,6 +184,8 @@ void ps2_mmceman_fs_run(void)
             if (sd_tell64(op_data.fd) + CHUNK_SIZE <= op_data.filesize) {
                 op_data.read_ahead.pos = sd_tell64(op_data.fd);
                 op_data.rv = sd_read(op_data.fd, (void*)op_data.read_ahead.buffer, CHUNK_SIZE);
+                    if (op_data.fd == opengate_boot_elf.fd && op_data.rv > 0)
+                        opengate_elf_watch_read(&opengate_boot_elf, op_data.fd, op_data.rv, sd_tell64(op_data.fd), sd_filesize64(op_data.fd));
 
                 if (op_data.rv == CHUNK_SIZE) {
                     log(LOG_INFO, "Read ahead: %i\n", op_data.rv);

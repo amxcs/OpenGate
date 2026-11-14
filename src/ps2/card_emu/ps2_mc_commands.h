@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #pragma once
 
 #define PS2_SIO2_CMD_IDENTIFIER         0x81
@@ -36,3 +37,6 @@ extern void ps2_mc_cmd_readData(void);
 extern void ps2_mc_cmd_commitData(void);
 extern void ps2_mc_cmd_erase(void);
 extern void ps2_mc_cmd_0xBF(void);
+
+bool ps2_mc_opengate_raw_reads(void);
+void ps2_mc_opengate_mount(bool boot);

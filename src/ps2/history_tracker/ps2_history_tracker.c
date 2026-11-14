@@ -228,7 +228,7 @@ void ps2_history_tracker_init() {
 void ps2_history_tracker_task() {
     uint64_t micros = time_us_64();
 
-    if ((micros < HISTORY_BOOTUP_DEL)
+    if (ps2_cardman_builtin_active() || (micros < HISTORY_BOOTUP_DEL)
             || writeOccured
             || !ps2_cardman_is_idle()) {
             lastAccess = micros;

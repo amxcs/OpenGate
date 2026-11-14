@@ -67,3 +67,16 @@ void ps2_cardman_set_variant(int variant);
 bool ps2_cardman_needs_update(void);
 bool ps2_cardman_is_accessible(void);
 bool ps2_cardman_is_idle(void);
+
+/* OpenGate builtin card */
+bool ps2_cardman_builtin_active(void);
+void ps2_cardman_builtin_elf_closed(void);
+void ps2_cardman_opengate_notify_reset(void);
+/* True while the next ps2_cardman_open() will mount the builtin card. */
+bool ps2_cardman_opengate_switch_pending(void);
+/* Real-reset signature: a console boot probes the bus with a burst of ~22
+ * transactions starting with 0x21, ~1.1 s before the 0xF3 auth reset. A user
+ * reset has >= ~1.7 s of bus silence before that burst; the console's own IOP
+ * reboots (PS2BBL, OSD, game launch) have ~1.0 s or less. */
+#define OPENGATE_RESET_PREGAP_US   1400000u /* min silence before the burst   */
+#define OPENGATE_BOOT_BURST_MIN    12u      /* min 0x21 count to call a burst */

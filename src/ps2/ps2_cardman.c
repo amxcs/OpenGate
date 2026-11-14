@@ -1,3 +1,5 @@
+#include "opengate_builtin.h"
+#include "card_emu/ps2_mc_commands.h"
 #include "ps2_cardman.h"
 
 #include <stdbool.h>
@@ -48,6 +50,19 @@ uint8_t available_sectors[SECTOR_COUNT_8MB / 8];  // bitmap
 #endif
 static uint8_t flushbuf[BLOCK_SIZE];
 int cardman_fd = -1;
+
+/* OpenGate builtin card state (core 0). */
+static bool opengate_pending, opengate_active, opengate_finished, opengate_started;
+/* Set on core 1 (or the PS1 side) on a detected real console reset. */
+static volatile bool opengate_reset_req;
+bool ps2_cardman_builtin_active(void) { return opengate_active; }
+bool ps2_cardman_opengate_switch_pending(void) { return opengate_pending; }
+void ps2_cardman_builtin_elf_closed(void) {
+    if (opengate_active && !ps2_mc_opengate_raw_reads()) opengate_finished = true;
+}
+void ps2_cardman_opengate_notify_reset(void) {
+    __atomic_store_n(&opengate_reset_req, true, __ATOMIC_RELAXED);
+}
 
 int current_read_sector = 0, priority_sector = -1;
 
@@ -117,6 +132,7 @@ static bool try_set_game_id_card() {
 }
 
 int ps2_cardman_read_sector(int sector, void *buf512) {
+    if (opengate_active) return opengate_builtin_read((uint32_t)sector, buf512, ps2_mc_opengate_raw_reads());
     if (cardman_fd < 0)
         return -1;
 
@@ -163,6 +179,7 @@ static bool try_set_prev_named_card() {
 }
 
 int ps2_cardman_write_sector(int sector, void *buf512) {
+    if (opengate_active) return opengate_builtin_write((uint32_t)sector, buf512);
     if (cardman_fd < 0)
         return -1;
 
@@ -639,6 +656,27 @@ void ps2_cardman_open(void) {
     needs_update = false;
 
     ensuredirs();
+    if (opengate_pending) {
+        /* The console is booting fresh, so there is no mcman cache to
+         * invalidate: cancel the "ignore next 5 mcman requests" ramp, it would
+         * eat the BIOS's 0x11/0xF3 auth start. */
+        mmceman_mcman_retry_counter = 0;
+        opengate_pending = false;
+        opengate_active = true;
+        opengate_finished = false;
+        cardman_fd = -1;
+        card_size = PS2_CARD_SIZE_64M;
+        sector_count = card_size / BLOCK_SIZE;
+        opengate_builtin_reset();
+        ps2_mc_data_interface_set_sdmode(true);
+        ps2_mc_data_interface_card_changed();
+        ps2_mc_opengate_mount(true);
+        cardman_operation = CARDMAN_OPEN;
+        cardprog_start = time_us_64(); cardprog_pos = 0;
+        if (cardman_cb) cardman_cb(0, false);
+        return;
+    }
+    ps2_mc_opengate_mount(false);
 
     ps2_cardman_resolveCardPath(path);
 
@@ -685,6 +723,12 @@ void ps2_cardman_open(void) {
 }
 
 void ps2_cardman_close(void) {
+    if (opengate_active) {
+        opengate_active = opengate_finished = false;
+        opengate_builtin_reset();
+        ps2_mc_opengate_mount(false);
+        return;
+    }
     if (cardman_fd < 0)
         return;
     ps2_cardman_flush();
@@ -901,6 +945,10 @@ bool ps2_cardman_is_idle(void) {
 }
 
 void ps2_cardman_init(void) {
+    /* OpenGate: present the builtin card from the first access on power-up, and
+     * after a real reset detected while in PS1 mode (see ps1_task()). */
+    opengate_pending = !opengate_started || __atomic_exchange_n(&opengate_reset_req, false, __ATOMIC_RELAXED);
+    opengate_started = true;
     card_variant = settings_get_ps2_variant();
     if (!try_set_boot_card())
         set_default_card();
@@ -910,4 +958,19 @@ void ps2_cardman_init(void) {
 
 void ps2_cardman_task(void) {
     ps2_cardman_continue();
+    /* OpenGate: a real console reset re-presents the builtin card, unless it is
+     * already mounted or pending (then the reset is part of the boot that is
+     * reading it). After it finishes, return to the BOOT card. */
+    if (__atomic_exchange_n(&opengate_reset_req, false, __ATOMIC_RELAXED)
+            && !opengate_active && !opengate_pending) {
+        opengate_pending = true;
+        needs_update = true;
+        if (!try_set_boot_card())
+            set_default_card();
+    }
+    /* BOOT/BOOT.ELF was read completely: switch back to the selected card. */
+    if (opengate_active && opengate_finished && !mmceman_op_in_progress) {
+        opengate_finished = false;
+        needs_update = true;
+    }
 }

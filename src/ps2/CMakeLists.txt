@@ -1,5 +1,6 @@
 
 add_library(ps2_card STATIC
+                ${CMAKE_CURRENT_SOURCE_DIR}/opengate_builtin.c
                 ${CMAKE_CURRENT_SOURCE_DIR}/mmceman/ps2_mmceman.c
                 ${CMAKE_CURRENT_SOURCE_DIR}/mmceman/ps2_mmceman_commands.c
                 ${CMAKE_CURRENT_SOURCE_DIR}/mmceman/ps2_mmceman_debug.c

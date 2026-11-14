@@ -29,6 +29,21 @@ static uint8_t* curr_page = NULL;
 static bool ps2_multitap = false;
 
 volatile bool ps1_card_active = false;
+
+/* OpenGate: set on core 1 when a PS2 console boot burst is seen in PS1 mode.
+ * A PS1 never sends 0x21 bursts; a PS2 BIOS boot sends ~22 of them after
+ * >= 1.4 s of bus silence (same signature as in PS2 mode). */
+volatile bool opengate_ps1_ps2_boot_req = false;
+static uint32_t gb1_last, gb1_pregap, gb1_n21;
+static inline void __time_critical_func(opengate_ps1_reset_track)(uint8_t ch) {
+    uint32_t now = time_us_32();
+    uint32_t gap = gb1_last ? now - gb1_last : 0u;
+    gb1_last = now;
+    if (gap >= 100000u || !gap) { gb1_pregap = gap; gb1_n21 = 0; }
+    if (ch == 0x21 && ++gb1_n21 == OPENGATE_PS1_BOOT_BURST_MIN
+            && gb1_pregap >= OPENGATE_PS1_RESET_PREGAP_US)
+        opengate_ps1_ps2_boot_req = true;
+}
 volatile int ps1_mc_exit_request, ps1_mc_reset;
 static volatile int mc_exit_response, mc_enter_request, mc_enter_response;
 
@@ -357,6 +372,7 @@ static void __time_critical_func(mc_main_loop)(void) {
             }
         }
 
+        opengate_ps1_reset_track(ch);
         if (0x81 == ch) { /* Command is for MC - process! */
             ps1_card_backend->respond(flag);
 
@@ -403,6 +419,10 @@ static void __no_inline_not_in_flash_func(mc_main)(void) {
         {}
         ps1_card_backend->reset();
         ps1_card_backend->startup();
+        /* OpenGate: start the silence clock at PS1-mode entry, otherwise the
+         * first reset after a cold start has no previous transaction. */
+        gb1_last = time_us_32() | 1u;
+        gb1_n21 = 0;
         mc_enter_response = 1;
         mc_main_loop();
         ps1_card_backend->shutdown();

@@ -22,6 +22,7 @@
 #include "ps1_memory_card.h"
 #include "ps1_card_backend.h"
 #include "ps1_mmce.h"
+#include "ps2/ps2_cardman.h"
 
 
 #ifdef PMC_BUTTONS
@@ -75,6 +76,13 @@ void ps1_init() {
 bool ps1_task() {
     bool backend_running = ps1_card_backend_task();
     ps1_mmce_task();
+    /* OpenGate: a real PS2 console reset while in (temporary) PS1 mode: go back
+     * to PS2 mode and present the builtin card from the first access. */
+    if (opengate_ps1_ps2_boot_req) {
+        opengate_ps1_ps2_boot_req = false;
+        ps2_cardman_opengate_notify_reset();
+        settings_set_mode(MODE_PS2);
+    }
 
 #if WITH_GUI
     gui_task();
