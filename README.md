@@ -1,76 +1,74 @@
-![sd2psXtd Logo](doc/Logo.png)
-*Logo by Berion ❤️*
+# OpenGate
 
-# sd2psXtd Firmware
+OpenGate is a firmware for the **sd2psx** memory card emulator, based on
+[sd2psXtd](https://github.com/sd2psXtd/firmware) 1.5.0. It adds a **built-in
+boot card**: the PS2 boots your homebrew launcher straight from the SD card,
+with no exploit installed on a memory card and nothing else to set up on the
+console.
 
-sd2psXtd is an extended firmware for the popular *Multipurpose MemoryCard Emulator* sd2psx by developer @xyzz (see [here](https://github.com/sd2psx)). It combines cutting-edge extended functionality (like game ID switching, file system access, and dynamic mode selection) with the rock-solid performance of the original sd2psx firmware.
+The built-in card is presented again on **every** console start:
 
-It provides the same functionality as the official stable firmware and extends it with the following features:
+- cold boot (power on)
+- reset button, from the menu or from inside a PS2 game
+- reset after playing a PS1 game (the firmware leaves PS1 mode by itself)
 
-- **PS2:** Game ID switching
-- **PS2:** PS1 dynamic mode selection
-- **PS2:** MMCEMAN and MMCEDRV support
-- **PS2:** Instant card availability
-- **PS2:** 1-128 MB card size support
-- **PS2:** Support for developer (`DTL-H` & `DTL-T`), Arcade (`COH-H`) and Prototype (`EB`?) models is available.
-- **PS1:** BootCard mechanics
-- **PS1:** PSRAM support
-- **PS1:** Card Switch Controller Combo Support
-- **PS1:** Super fast FreePSXBoot
-- **PS1:** Net Yaroze Support
-- **General:** Settings file
-- **General:** Support for other RP2040-based MMCE devices
-- **General:** Per Card Config
-- **General:** Game2Folder mapping
-- **General:** Splash Screen
-- **General:** Game Image Screen
-- **General:** USB-CDC command interface
-- **General:** USB microSD mass storage
-- **General:** USB PS3 Memory Card Adaptor emulation
-- **General:** GPT and superfloppy SD card layouts
+After the launcher has been loaded, OpenGate switches back to your normal
+card, so saves, Game ID switching and the other sd2psXtd features keep
+working as usual.
 
-> [!CAUTION]
-> If *sd2psx* is connected to a PS1 or a PS1 multitap in PS2 mode, there is always a risk of damaging your console / multitap. Safeguards have been implemented to minimize this risk, but they are not entirely foolproof. You have been warned!
+Tested on a PS2 with **BIOS 2.30**.
 
-## General: Support for Other RP2040-Based MMCE Devices
+## What you need
 
-Support for different MMCE devices that share the same MCU has been added:
+- An sd2psx with a microSD card
+- `sd2psx.uf2` from the [Releases](../../releases) page, or your own build
+  (see [Building](#building))
+- The ELF you want to boot, saved on the SD card as `BOOT/BOOT.ELF`:
 
-- **PicoMemcard+/PicoMemcardZero:** DIY devices by dangiu (see [here](https://github.com/dangiu/PicoMemcard?tab=readme-ov-file#picomemcard-using-memory-card)) without PSRAM. Use *PMC+* or *PMCZero* firmware variant.
-- **PSXMemCard:** A commercial device by BitFunX sharing the same architecture as *PMC+*. Use *psxmemcard* firmware variant.
-- **PSXMemCard Gen2:** A commercial device by BitFunX, sharing the same architecture as *sd2psx*. Use *sd2psx* firmware variant.
+  ```
+  SD card
+  └── BOOT/
+      └── BOOT.ELF
+  ```
 
-For each device, follow the flashing instructions provided by the creator, using the corresponding *sd2psXtd* firmware file.
+## Installation
 
-*New in 1.2*:
-PMC+ and PMCZero now support using the onboard buttons. They are assigned in the following way (according to the markings ons their board):
+1. **Flash the firmware.** Hold the sd2psx button while you connect it to
+   your computer over USB. A drive named `RPI-RP2` appears. Copy
+   `sd2psx.uf2` to it. The device restarts with the new firmware.
+2. **Copy your ELF** to the SD card as `BOOT/BOOT.ELF`.
+3. Insert the sd2psx in memory card slot 1 and turn on the console.
 
-- **Button 1**: Load BootCard
-- **Button 2**:
-    - Short Press: Previous Channel
-    - Long Press: Previous Card
-- **Button 3**:
-    - Short Press: Next Channel
-    - Long Press: Next Card
+## Recommended setup
 
-## Documentation
+I recommend **PS2BBL** from the **SD2PSX / PSxMemCard Gen 1/2 SD Card**
+package: [MMCE-ALL.7z](https://downloads.ps2homebrewstore.com/MMCE-ALL.7z).
+Use its PS2BBL as `BOOT/BOOT.ELF`, and enable the PS2 boot card in the sd2psx
+settings (PS2 autoboot). After PS2BBL has started, OpenGate returns to the
+BOOT card, and PS2BBL reads its configuration from there.
 
-- [PS1 and PS2 features](doc/features.md) — game ID switching, card sizes, console variants, controller shortcuts, and more.
-- [Configuration](doc/configuration.md) — settings file, per-card options, and Game2Folder mapping.
-- [USB interfaces](doc/usb.md) — USB mass storage, PS3 Memory Card Adaptor emulation, and USB-CDC commands.
-- [Display customization](doc/customization.md) — startup splash and card images.
+## How it works
 
-## Special Thanks to...
+On start-up the console reads the built-in card and loads `BOOT/BOOT.ELF`
+from the SD card. When the file has been read completely, OpenGate switches
+back to the selected card. A real console reset brings the built-in card
+back; the console's own internal restarts (for example when a launcher or a
+game reloads the IOP) do not.
 
-- **@xyz**: for sd2psx ❤️
-- **sd2psXtd Team**: (you know who you are 😉 )
-- **@El_isra**: for so much different stuff ❤️
-- **@Berion**: Our new beautiful logo ❤️
-- **8BitMods Team**: for helping out with card formatting and providing lots of other useful information ❤️
-- **@Mena / PhenomMods**: for providing hardware to some team members ❤️
-- **BitFunX**: for providing PSXMemcard and PSXMemcard Gen2 Hardware for dev ❤️
-- **@mathewbeall**: for arcade fixes ❤️
-- **@wark**: for USB mass storage inspiration ❤️
-- **@max-las**: for SD-related fixes ❤️
-- **All Testers**: ripto, Vapor, seewood, john3d, rippenbiest, ... ❤️
-- **@niemasd**: For his [*GameDB-PSX*](https://github.com/niemasd/GameDB-PSX) database - Game naming and ID on PS1 would not be possible without it! ❤️
+The full description is in [OPENGATE.md](OPENGATE.md).
+
+## Building
+
+OpenGate builds the same way as sd2psXtd. See the
+[sd2psXtd README](README.sd2psXtd.md) and the upstream documentation. Builds
+from an untagged commit report version `1.5.0-opengate`.
+
+## Credits
+
+- [sd2psXtd](https://github.com/sd2psXtd/firmware): the firmware OpenGate is based on
+- [sd2psx](https://github.com/sd2psx) by @xyzz: the original hardware and firmware
+- [PS2BBL](https://github.com/israpps/PlayStation2-Basic-BootLoader): the recommended launcher
+
+## License
+
+GPL-3.0, the same as sd2psXtd. See [LICENSE](LICENSE).
