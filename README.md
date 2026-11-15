@@ -44,7 +44,7 @@ Tested on a PS2 with **BIOS 2.30**.
 
 ## Recommended setup
 
-I recommend **PS2BBL Extended** from the **SD2PSX / PSxMemCard Gen 1/2 SD Card**
+I recommend **[PS2BBL Extended](https://github.com/saildot4k/PlayStation2-Basic-BootLoader-Extended)** from the **SD2PSX / PSxMemCard Gen 1/2 SD Card**
 package: [MMCE-ALL.7z](https://downloads.ps2homebrewstore.com/MMCE-ALL.7z).
 Use its PS2BBLE[^1] as `BOOT/BOOT.ELF`, and enable the PS2 boot card in the sd2psx
 settings (PS2 autoboot). After PS2BBLE[^1] has started, OpenGate returns to the
