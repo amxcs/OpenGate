@@ -1,5 +1,7 @@
 # OpenGate
 
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-amxcs-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/amxcs)
+
 OpenGate is a firmware for the **sd2psx** memory card emulator, based on
 [sd2psXtd](https://github.com/sd2psXtd/firmware) 1.5.0. It adds a **built-in
 boot card**: the PS2 boots your homebrew launcher straight from the SD card,
@@ -85,3 +87,8 @@ from an untagged commit report version `1.5.0-opengate`.
 ## License
 
 GPL-3.0, the same as sd2psXtd. See [LICENSE](LICENSE).
+
+## Support
+
+If OpenGate was useful to you, you can
+[buy me a coffee](https://ko-fi.com/amxcs).
