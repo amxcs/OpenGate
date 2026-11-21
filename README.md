@@ -21,7 +21,10 @@ working as usual.
 The exploit runs very early, **before the PS2 boot logo (splash screen)**, so
 that screen is skipped and your launcher comes up directly.
 
-Tested on a PS2 with **BIOS 2.30**.
+OpenGate now works with **BIOS 2.20 and 2.30**.
+
+Support for **BIOS 1.10, 1.20, 1.50, 1.60, 1.70, 1.90, 2.00 and 2.50**
+is expected soon; these versions are not yet supported.
 
 ## What you need
 
@@ -46,11 +49,11 @@ Tested on a PS2 with **BIOS 2.30**.
 
 ## Recommended setup
 
-I recommend **PS2BBLE** from the **SD2PSX / PSxMemCard Gen 1/2 SD Card**
+I recommend **ps2bble** from the **SD2PSX / PSxMemCard Gen 1/2 SD Card**
 package: [MMCE-ALL.7z](https://downloads.ps2homebrewstore.com/MMCE-ALL.7z).
-Use its PS2BBLE as `BOOT/BOOT.ELF`, and enable the PS2 boot card in the sd2psx
-settings (PS2 autoboot). After PS2BBLE has started, OpenGate returns to the
-BOOT card, and PS2BBL reads its configuration from there.
+Use its ps2bble as `BOOT/BOOT.ELF`, and enable the PS2 boot card in the sd2psx
+settings (PS2 autoboot). After ps2bble has started, OpenGate returns to the
+BOOT card, and ps2bble reads its configuration from there.
 
 If you want to keep the PS2 boot logo (splash screen), use
 [OSDMenu](https://github.com/pcm720/OSDMenu) as `BOOT/BOOT.ELF`: it boots the
@@ -58,9 +61,10 @@ same way as the stock browser, with the splash screen shown.
 
 For disc fans: if you want an authentic OSDMenu, you can also use my version:
 `BOOT.ELF` from the [latest release](https://github.com/amxcs/OpenGate/releases/latest).
-As a bonus, burned discs* start instantly and a few screen flickers are gone
+As a bonus, burned discs start instantly and a few screen flickers are gone
 (it uses a custom disc loader).
-*Requires installation of [Force Unlock V2](https://github.com/amxcs/MechaPwn-v2-unofficial/releases/tag/force-unlock-v2-r1)
+
+Booting burned discs requires [Force Unlock V2](https://github.com/amxcs/MechaPwn-v2-unofficial/releases/tag/force-unlock-v2-r1) to be installed.
 
 ## How it works
 
@@ -82,14 +86,14 @@ from an untagged commit report version `1.5.0-opengate`.
 
 - [sd2psXtd](https://github.com/sd2psXtd/firmware): the firmware OpenGate is based on
 - [sd2psx](https://github.com/sd2psx) by @xyzz: the original hardware and firmware
-- [PS2BBLE](https://github.com/saildot4k/PlayStation2-Basic-BootLoader-Extended): the recommended launcher
+- [ps2bble](https://github.com/saildot4k/PlayStation2-Basic-BootLoader-Extended): the recommended launcher
 - [OSDMenu](https://github.com/pcm720/OSDMenu) by pcm720: launcher that keeps the PS2 boot logo
 
 
 
 ## License
 
-GPL-3.0, the same as sd2psXtd. See [LICENSE](LICENSE).
+GPL-3.0, the same as sd2psXtd. See [LICENSE](LICENSE.txt).
 
 ## Support
 
