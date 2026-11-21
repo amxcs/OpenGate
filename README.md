@@ -11,8 +11,8 @@ console.
 The built-in card is presented again on **every** console start:
 
 - cold boot (power on)
-- reset button, from the menu or from inside a PS2 game
-- reset after playing a PS1 game (the firmware leaves PS1 mode by itself)
+- reset button, from the menu
+- reset button, from inside a PS1 or PS2 game
 
 After the launcher has been loaded, OpenGate switches back to your normal
 card, so saves, Game ID switching and the other sd2psXtd features keep
@@ -46,10 +46,10 @@ Tested on a PS2 with **BIOS 2.30**.
 
 ## Recommended setup
 
-I recommend **PS2BBL** from the **SD2PSX / PSxMemCard Gen 1/2 SD Card**
+I recommend **PS2BBLE** from the **SD2PSX / PSxMemCard Gen 1/2 SD Card**
 package: [MMCE-ALL.7z](https://downloads.ps2homebrewstore.com/MMCE-ALL.7z).
-Use its PS2BBL as `BOOT/BOOT.ELF`, and enable the PS2 boot card in the sd2psx
-settings (PS2 autoboot). After PS2BBL has started, OpenGate returns to the
+Use its PS2BBLE as `BOOT/BOOT.ELF`, and enable the PS2 boot card in the sd2psx
+settings (PS2 autoboot). After PS2BBLE has started, OpenGate returns to the
 BOOT card, and PS2BBL reads its configuration from there.
 
 If you want to keep the PS2 boot logo (splash screen), use
@@ -58,8 +58,9 @@ same way as the stock browser, with the splash screen shown.
 
 For disc fans: if you want an authentic OSDMenu, you can also use my version:
 `BOOT.ELF` from the [latest release](https://github.com/amxcs/OpenGate/releases/latest).
-As a bonus, burned discs start instantly and a few screen flickers are gone
+As a bonus, burned discs* start instantly and a few screen flickers are gone
 (it uses a custom disc loader).
+*Requires installation of [Force Unlock V2](https://github.com/amxcs/MechaPwn-v2-unofficial/releases/tag/force-unlock-v2-r1)
 
 ## How it works
 
@@ -81,8 +82,10 @@ from an untagged commit report version `1.5.0-opengate`.
 
 - [sd2psXtd](https://github.com/sd2psXtd/firmware): the firmware OpenGate is based on
 - [sd2psx](https://github.com/sd2psx) by @xyzz: the original hardware and firmware
-- [PS2BBL](https://github.com/israpps/PlayStation2-Basic-BootLoader): the recommended launcher
+- [PS2BBLE](https://github.com/saildot4k/PlayStation2-Basic-BootLoader-Extended): the recommended launcher
 - [OSDMenu](https://github.com/pcm720/OSDMenu) by pcm720: launcher that keeps the PS2 boot logo
+
+
 
 ## License
 
