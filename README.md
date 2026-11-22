@@ -50,11 +50,11 @@ is expected soon.
 
 ## Recommended setup
 
-I recommend **ps2bble** from the **SD2PSX / PSxMemCard Gen 1/2 SD Card**
+I recommend **[PS2BBL Extended](https://github.com/saildot4k/PlayStation2-Basic-BootLoader-Extended)** from the **SD2PSX / PSxMemCard Gen 1/2 SD Card**
 package: [MMCE-ALL.7z](https://downloads.ps2homebrewstore.com/MMCE-ALL.7z).
-Use its ps2bble as `BOOT/BOOT.ELF`, and enable the PS2 boot card in the sd2psx
-settings (PS2 autoboot). After ps2bble has started, OpenGate returns to the
-BOOT card, and ps2bble reads its configuration from there.
+Use its PS2BBLE[^1] as `BOOT/BOOT.ELF`, and enable the PS2 boot card in the sd2psx
+settings (PS2 autoboot). After PS2BBLE[^1] has started, OpenGate returns to the
+BOOT card, and PS2BBLE[^1] reads its configuration from there.
 
 If you want to keep the PS2 boot logo (splash screen), use
 [OSDMenu](https://github.com/pcm720/OSDMenu) as `BOOT/BOOT.ELF`: it boots the
@@ -87,7 +87,7 @@ from an untagged commit report version `1.5.0-opengate`.
 
 - [sd2psXtd](https://github.com/sd2psXtd/firmware): the firmware OpenGate is based on
 - [sd2psx](https://github.com/sd2psx) by @xyzz: the original hardware and firmware
-- [ps2bble](https://github.com/saildot4k/PlayStation2-Basic-BootLoader-Extended): the recommended launcher
+- [PS2BBL Extended](https://github.com/saildot4k/PlayStation2-Basic-BootLoader-Extended): the recommended launcher
 - [OSDMenu](https://github.com/pcm720/OSDMenu) by pcm720: launcher that keeps the PS2 boot logo
 
 
@@ -100,3 +100,5 @@ GPL-3.0, the same as sd2psXtd. See [LICENSE](LICENSE.txt).
 
 If OpenGate was useful to you, you can
 [buy me a coffee](https://ko-fi.com/amxcs).
+
+[^1]: PlayStation 2 Basic BootLoader Extended
