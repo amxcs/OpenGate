@@ -21,10 +21,9 @@ working as usual.
 The exploit runs very early, **before the PS2 boot logo (splash screen)**, so
 that screen is skipped and your launcher comes up directly.
 
-OpenGate has been tested and confirmed working with **BIOS 1.50, 2.00, 2.20 and 2.30**.
-**BIOS 1.50, 2.00, 2.20 support is not yet included in a published release.**
+OpenGate has been tested and confirmed working with **BIOS 1.50, 1.60, 2.00, 2.20 and 2.30**.
 
-Support for **BIOS 1.10, 1.20, 1.60, 1.70, 1.90 and 2.50**
+Support for **BIOS 1.10, 1.20, 1.70, 1.90 and 2.50**
 is expected soon.
 
 ## What you need
